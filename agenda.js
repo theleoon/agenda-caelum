@@ -1,10 +1,14 @@
 (function(){
     /** User interface */
     const ui = {
+      // Estou pegando todos os campos que são da tag input
       fields: document.querySelectorAll("input"),
+      // Estou pegando todos os botões que possuem a classe do CSS .pure-button
       button: document.querySelector(".pure-button"),
+      // Estou varregendo Window e pegando a tag tbody que é a nossa table
       table: document.querySelector("tbody")
     };
+
     /** Modelo Contact */
     let contact = {
       name: "",
@@ -12,51 +16,49 @@
       fone: ""
     };
 
-    // Validação dos campos de forma dinâmica
+    /**
+     * Método responsável pela validação de todos os campos da tela, validação se está vazio.
+     * @param {*} e 
+     */
      const validateFields = function (e){
        let erros = 0;
        let contgetContactsact = {};
        // Previne rodar o evento default do botão dentro do formulário que é submeter a informação e dar reload da tela.
        e.preventDefault();
 
-      //  console.log(e.target);
-      //  console.log(ui.fields[0].value);
+      //  console.log(e.target); (Consegue pegar aonde o evento foi disparado pelo usuário)
 
        ui.fields.forEach(
          function (field, pos, campos) {
            if(field.value.trim().length > 0){
              contact[field.id] = field.value;
              field.classList.remove("error");
-            //  console.log(campo.value.trim().length);
           } else {
             erros += 1;
             field.classList.add("error");
           }
-          //  console.log(field.id ,field.value.trim().length);
-          //  console.log(contact, erros);
         }
        );
 
        if(erros === 0){
          addContact(contact);
-       } else {getContacts
+       } else {
          document.querySelector(".error").focus();
        }
      };
 
+     /**
+      * Função que faz a limpeza de todos os campos da tela
+      */
      const cleanFields = function(){
        // Usando arrow function
        ui.fields.forEach(field => field.value = "");
-     }
-
-     const addContactSuccess = function(){
-       cleanFields();
-       getContacts();
-     }
-     // Usando arrow function
-     const addContactError = () => console.error("Erro durante a gravação");
+     };
 
      /** REST API (GET, POST, PUT/PATCH, DELETE)*/
+     /**
+      * Função para adicionar um novo contato
+      */
      const addContact = function (contact){
        const endPoint = "http://localhost:1234/contacts";
        // Header , tipo um contrato determinando o que vamos receber e enviar
@@ -68,14 +70,25 @@
          body: JSON.stringify(contact),
          headers: headers
        };
-      //  console.log(config);
 
-      /** Executa o processo de comunicação POST utilizando FETCH */
+      /** Executa o processo de comunicação POST utilizando FETCH ECS 6 */
        fetch(endPoint, config)
         .then(addContactSuccess)
-        //.catch(addContactError);
+        .catch(messagePostError);
      };
 
+     /**
+      * Função após sucesso de inserir um novo contato, faz a limpeza da tela e atualiza a lista de contatos
+      */
+      const addContactSuccess = function(){
+        cleanFields();
+        getContacts();
+      };
+
+      /**
+       * Função responsável por montar o HTML da nossa table, precisa receber uma lista de contatos
+       * @param {*} contacts 
+       */
      const getContactsSucess = function(contacts){
        let html = [];
        let linha;
@@ -100,8 +113,11 @@
             })
          }
         ui.table.innerHTML = html.join("");
-       }
+       };
 
+       /**
+        * Função reponsável por efetuar o GET no servidor pegandos todos os contatos
+        */
      const getContacts = function (){
        const endPoint = "http://localhost:1234/contacts";
        // Header , tipo um contrato determinando o que vamos receber e enviar
@@ -117,9 +133,13 @@
        fetch(endPoint, config)
        .then(response => response.json())
        .then(getContactsSucess)
-       .catch(addContactError);
+       .catch(messageGetError);
       };
 
+      /**
+       * Função responsável por verificar o evento do usuário e se for o evento do botão "delete" pega o ID e faz um DELETE
+       * @param {*} e 
+       */
       const removeContact = function (e){
         e.preventDefault();
         if(e.target.dataset.action === 'delete'){
@@ -139,21 +159,46 @@
          /** Executa o processo de comunicação GET utilizando FETCH */
           fetch(endPoint, config)
           .then(getContacts)
-          .catch(addContactError);
+          .catch(messageDeleteError);
         }
       };
 
+     /**
+      * Funções de mensagens de status para o desenvolvimento
+      */
+      const messagePostSucess = function(){
+        console.log("POST - Realizado com sucesso");
+      };
+      const messagePostError = function(){
+        console.error("Erro durante o POST");
+      };
+      const messageGetSucess = function(){
+        console.log("GET - Realizado com sucesso");
+      };
+      const messageGetError = function(){
+        console.error("Erro durante o GET");
+      };
+      const messageDeleteSucess = function(){
+        console.log("DELETE - Realizado com sucesso");
+      };
+      const messageDeleteError = function(){
+        console.error("Erro durante o DELETE");
+      };
+
+      /**
+       * Função de start-up da página, só roda uma única vez
+       */
      const init = function(){
        // Mapeando os eventos da aplicação
       //  ui.button.onmouseover = function() {
       //    alert("sobre");
       //  }
+      // Adiciono um evento em todos os botões, com a chamada para validar os campos
       ui.button.addEventListener("click", validateFields);
+      // Adiciono um evento na tabela, e chamo a função de remover contato onde é filtrado se o evento foi realmente do nosso link de remover
       ui.table.addEventListener("click", removeContact);
+      // Faço o carregamento inicial dos contatos
       getContacts();
      }();
 
-    //  console.log("Modelo: ", contact);
-     //sconsole.log(ui);
-     //console.log("Lista dos Modelos: ", listContacts());
 })();
