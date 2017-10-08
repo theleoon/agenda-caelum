@@ -1,0 +1,17 @@
+{
+  "name": "agenda-dev",
+  "version": "1.0.0",
+  "description": "Projeto do curso WD-47 Caelum com o instrutor Leonardo Souza",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "front": "lite-server",
+    "backend": "json-server --watch db.json --port 1234"
+  },
+  "author": "Leonardo Silva",
+  "license": "ISC",
+  "dependencies": {
+    "json-server": "^0.12.0",
+    "lite-server": "^2.3.0"
+  }
+}
